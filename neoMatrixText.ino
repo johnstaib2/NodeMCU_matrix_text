@@ -58,7 +58,7 @@ const char* ssid = "Be_Maker";
 const char* password = "pulpoparacomer";
 
 String payload="hola";
-long l= 10*payload.length();
+long lon= 10*payload.length();
   
 HTTPClient http;
 
@@ -92,28 +92,31 @@ void setup() {
 
 int x    = matrix.width();
 int pass = 0;
-
+long last_time_exec=0;
 void loop() {
-  matrix.fillScreen(0);
-  matrix.setCursor(x, 0);
-  matrix.print(payload);
-  x--;
-  if(x < -l) { //palabra acabada
-    x = matrix.width();
 
-   http.begin("http://justmine.me/arduino/getLedInfo.php"); //HTTP
-   int httpCode = http.GET();
-    if(httpCode == HTTP_CODE_OK) {
-       payload = http.getString();
-       USE_SERIAL.println(payload);
-       l= 7*payload.length();
-       USE_SERIAL.println(l);   
-    }else{
-       USE_SERIAL.printf("Error %d\n",httpCode);
+  if(millis() > last_time_exec + 200){
+    last_time_exec=millis();
+    matrix.fillScreen(0);
+    matrix.setCursor(x, 0);
+    matrix.print(payload);
+    x--;
+    http.begin("http://justmine.me/arduino/getLedInfo.php"); //HTTP
+     int httpCode = http.GET();
+      if(httpCode == HTTP_CODE_OK) {
+        String payload_aux = http.getString();
+        if(payload != payload_aux){
+           x = matrix.width();
+           payload= payload_aux;
+           lon= 7*payload.length();
+           USE_SERIAL.println(lon); 
+        }
+           
+      }
+    if(x < -lon) { //palabra acabada
+      x = matrix.width();
     }
-    
-    
-  }
-  matrix.show();
-  delay(200);
+    matrix.show();
+
+    }
 }
